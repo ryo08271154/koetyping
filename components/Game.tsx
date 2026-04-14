@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { checkMicPermission, createRecognition } from "../lib/recognition";
+import { createRecognition } from "../lib/recognition";
 import { getRandomSentence, judge, Sentence } from "../lib/sentences";
 import { useRouter } from "next/navigation";
 import ErrorModal from "@/components/ErrorModal";
+import { isInAppBrowser } from "@/lib/inAppBrowser";
 
 export default function Game({
   onFinish,
@@ -53,17 +54,14 @@ export default function Game({
       start();
       return;
     }
-    //マイク使えるか確認
-    (async () => {
-      try {
-        await checkMicPermission();
-      } catch (e) {
-        setError(
-          "マイクの使用が許可されていません。設定からマイクの使用を許可してください。",
-        );
-        return;
-      }
-    })();
+
+    // アプリ内ブラウザの判定
+    if (isInAppBrowser()) {
+      setError(
+        "アプリ内ブラウザでは音声認識がサポートされていません。︙からブラウザで開くか、設定で入力モードを「キーボード」に変更してください。",
+      );
+      return;
+    }
 
     //音声認識初期化
     let recognition: SpeechRecognition | null = null;
